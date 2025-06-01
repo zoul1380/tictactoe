@@ -14,7 +14,10 @@ function App() {
     showNextRemoval,
     toggleNextRemovalFeature,
     nextRemovalIndex,
-    status
+    status,
+    firstPlayer,
+    changeFirstPlayer,
+    isGameInProgress
   } = useTicTacToe();
 
   return (
@@ -29,7 +32,7 @@ function App() {
       />
       {(winner || isDraw) && (
         <button className="reset-button" onClick={resetGame}>
-          🔄 Play Again?
+          🔄 Play Again? ({firstPlayer} goes first)
         </button>
       )}
       <div className="feature-controls">
@@ -41,6 +44,32 @@ function App() {
           />
           💡 Show next tile to be removed
         </label>
+        
+        <div className="first-player-control">
+          <span>🎲 First Player: </span>
+          <label className="radio-label">
+            <input
+              type="radio"
+              name="firstPlayer"
+              value="X"
+              checked={firstPlayer === 'X'}
+              onChange={() => changeFirstPlayer('X')}
+              disabled={isGameInProgress}
+            />
+            X
+          </label>
+          <label className="radio-label">
+            <input
+              type="radio"
+              name="firstPlayer"
+              value="O"
+              checked={firstPlayer === 'O'}
+              onChange={() => changeFirstPlayer('O')}
+              disabled={isGameInProgress}
+            />
+            O
+          </label>
+        </div>
       </div>
       <div className="instructions">
         <p>🎯 First player to get 3 in a row wins!</p>

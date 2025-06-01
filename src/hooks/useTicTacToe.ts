@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useMemo } from 'react';
 
 type Player = 'X' | 'O';
 interface Move {
@@ -19,13 +19,19 @@ const WINNING_COMBINATIONS = [
 ];
 
 export const useTicTacToe = () => {
+  const [firstPlayer, setFirstPlayer] = useState<Player>('X');
   const [board, setBoard] = useState<(Player | null)[]>(Array(9).fill(null));
-  const [currentPlayer, setCurrentPlayer] = useState<Player>('X');
+  const [currentPlayer, setCurrentPlayer] = useState<Player>(firstPlayer);
   const [moves, setMoves] = useState<Move[]>([]);
   const [winner, setWinner] = useState<Player | null>(null);
   const [winningCells, setWinningCells] = useState<number[] | null>(null);
   const [isDraw, setIsDraw] = useState(false);
   const [showNextRemoval, setShowNextRemoval] = useState(false);
+
+  // Calculate if game is in progress
+  const isGameInProgress = useMemo(() => {
+    return moves.length > 0 && !winner && !isDraw;
+  }, [moves, winner, isDraw]);
 
   const handleClick = useCallback((index: number) => {
     if (board[index] || winner) return;
@@ -66,14 +72,23 @@ export const useTicTacToe = () => {
     }
     return null;
   };
+  
   const resetGame = useCallback(() => {
     setBoard(Array(9).fill(null));
-    setCurrentPlayer('X');
+    setCurrentPlayer(firstPlayer);
     setMoves([]);
     setWinner(null);
     setWinningCells(null);
     setIsDraw(false);
-  }, []);
+  }, [firstPlayer]);
+  // Function to change who goes first
+  const changeFirstPlayer = useCallback((player: Player) => {
+    setFirstPlayer(player);
+    // Also update currentPlayer if game hasn't started yet
+    if (moves.length === 0) {
+      setCurrentPlayer(player);
+    }
+  }, [moves.length]);
 
   // Determine which cell will be removed next for the current player
   const getNextRemovalIndex = useCallback((): number | null => {
@@ -102,5 +117,8 @@ export const useTicTacToe = () => {
     toggleNextRemovalFeature,
     nextRemovalIndex: getNextRemovalIndex(),
     status: winner ? `Player ${winner} wins!` : isDraw ? "It's a draw!" : `Player ${currentPlayer}'s turn`,
+    firstPlayer,
+    changeFirstPlayer,
+    isGameInProgress
   };
 };
